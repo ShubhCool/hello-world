@@ -1,4 +1,4 @@
 # hello-world
-this repository is for data science activities
+this repository is for data science activities.
 
-learning git hub access
+1st submission: with simple logistic Regression 66% precision result 
