@@ -61,26 +61,69 @@ x=scale(x)
 from sklearn.model_selection import train_test_split
 x_train,x_test,y_train,y_test=train_test_split(x,y,test_size=0.3,random_state=42)
 
-# using logistic Regression 
+'''
+ using logistic Regression 
 from sklearn.linear_model import LogisticRegression
 LogReg=LogisticRegression(random_state=0)
 LogReg.fit(x_train,y_train)
 y_pred=LogReg.predict(x_test)
+'''
+'''
+#using K Nearest ALgo
+from sklearn.neighbors import KNeighborsClassifier
+knn=KNeighborsClassifier(n_neighbors=5)
+knn.fit(x_train,y_train)
+y_pred=knn.predict(x_test)
+'''
+#using SVM classfier
+from sklearn.svm import SVC
+svc=SVC(kernel='rbf',random_state=0,C=0.3)
+svc.fit(x_train,y_train)
+y_pred=svc.predict(x_test)
+
+'''
+arb=np.arange(0.01,0.5,0.05)
+train_error=[]
+test_error=[]
+for i in arb:
+    svc=SVC(kernel='rbf',random_state=0,C=i)
+    cv_result=cross_val_score(svc,x_train,y_train,cv=5)
+    train_error.append(cv_result.mean())
+    svc.fit(x_train,y_train)
+    y_pred=svc.predict(x_test)
+    test_error.append(accuracy_score(y_test,y_pred))
+
+import matplotlib.pyplot as plt
+plt.plot(arb,train_error,color='red')
+plt.plot(arb,test_error,color='blue')
+plt.show()
+   ''' 
+
+# using grid search CV with SVM classfier
+from sklearn.model_selection import GridSearchCV
+parameters=[{'C':[0.1,0.5,1,5],'kernel':['linear'] },
+            {'C':[0.1,0.5,1,5],'kernel':['poly'],'degree':[1,2,3,4,5] },
+            {'C':[0.1,0.5,1,5,10,100],'kernel':['rbf'] }]
+grid_sear=GridSearchCV(svc,param_grid=parameters,scoring='accuracy',cv=5)
+grid=grid_sear.fit(x_train,y_train)
+print(grid.best_score_)
+print(grid.best_params_)
+
 
 #checking performances
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
 print(accuracy_score(y_test,y_pred))
-print(LogReg.score(x_test,y_test))
+#print(svc.score(x_test,y_test))
 print(confusion_matrix(y_test,y_pred))
 
 
 
 from sklearn.model_selection import cross_val_score
-c,r=y_train.shape
-y_train=y_train.reshape(c,)
-cv_result=cross_val_score(LogReg,x_train,y_train,cv=5)
-
+#c,r=y_train.shape
+#y_train=y_train.reshape(c,)
+cv_result=cross_val_score(svc,x_train,y_train,cv=5)
+print(cv_result.mean())
 
 
 # taking test data as different dataset
@@ -123,7 +166,7 @@ data1=data1.drop(['Pclass_1','Sex_female','Embarked_C'],axis=1)
 
 #seperating X and Y
 x_test1=data1.values
-y_pred1=LogReg.predict(x_test1)
+y_pred1=svc.predict(x_test1)
 
 
 # transforming final result into submittable form
