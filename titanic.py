@@ -75,13 +75,14 @@ knn=KNeighborsClassifier(n_neighbors=5)
 knn.fit(x_train,y_train)
 y_pred=knn.predict(x_test)
 '''
+'''
 #using SVM classfier
 from sklearn.svm import SVC
 svc=SVC(kernel='rbf',random_state=0,C=0.3)
 svc.fit(x_train,y_train)
 y_pred=svc.predict(x_test)
 
-'''
+
 arb=np.arange(0.01,0.5,0.05)
 train_error=[]
 test_error=[]
@@ -97,7 +98,7 @@ import matplotlib.pyplot as plt
 plt.plot(arb,train_error,color='red')
 plt.plot(arb,test_error,color='blue')
 plt.show()
-   ''' 
+   
 
 # using grid search CV with SVM classfier
 from sklearn.model_selection import GridSearchCV
@@ -108,6 +109,60 @@ grid_sear=GridSearchCV(svc,param_grid=parameters,scoring='accuracy',cv=5)
 grid=grid_sear.fit(x_train,y_train)
 print(grid.best_score_)
 print(grid.best_params_)
+'''
+'''
+# using Naive bayes 
+from sklearn.naive_bayes import GaussianNB
+nb=GaussianNB()
+nb.fit(x_train,y_train)
+y_pred=nb.predict(x_test)
+'''
+'''
+# using decision tree
+from sklearn.tree import DecisionTreeClassifier
+dct=DecisionTreeClassifier(criterion='entropy',random_state=0)
+dct.fit(x_train,y_train)
+y_pred=dct.predict(x_test)
+'''
+
+# using random forest
+from sklearn.ensemble import RandomForestClassifier
+rf=RandomForestClassifier(n_estimators=7,criterion='gini',random_state=0)
+rf.fit(x_train,y_train)
+y_pred=rf.predict(x_test)
+
+'''
+arb=np.arange(1,20,1)
+train_error=[]
+test_error=[]
+for i in arb:
+    rf=RandomForestClassifier(n_estimators=i,criterion='gini',random_state=0)
+    cv_result=cross_val_score(rf,x_train,y_train,cv=5)
+    train_error.append(cv_result.mean())
+    rf.fit(x_train,y_train)
+    y_pred=rf.predict(x_test)
+    test_error.append(accuracy_score(y_test,y_pred))
+
+import matplotlib.pyplot as plt
+plt.plot(arb,train_error,color='red')
+plt.plot(arb,test_error,color='blue')
+plt.show()
+'''
+
+
+
+'''
+#using grid search CV with random forest  classfier
+rf=RandomForestClassifier(random_state=0)
+from sklearn.model_selection import GridSearchCV
+parameters=[{'n_estimators':np.arange(1,10,2),'criterion':['gini'] },
+            {'n_estimators':np.arange(1,10,2),'criterion':['entropy'] }
+]
+grid_sear=GridSearchCV(rf,param_grid=parameters,scoring='accuracy',cv=10)
+grid=grid_sear.fit(x_train,y_train)
+print(grid.best_score_)
+print(grid.best_params_)
+'''
 
 
 #checking performances
@@ -122,7 +177,7 @@ print(confusion_matrix(y_test,y_pred))
 from sklearn.model_selection import cross_val_score
 #c,r=y_train.shape
 #y_train=y_train.reshape(c,)
-cv_result=cross_val_score(svc,x_train,y_train,cv=5)
+cv_result=cross_val_score(rf,x_train,y_train,cv=5)
 print(cv_result.mean())
 
 
@@ -165,8 +220,8 @@ data1=data1.drop(['Pclass_1','Sex_female','Embarked_C'],axis=1)
 
 
 #seperating X and Y
-x_test1=data1.values
-y_pred1=svc.predict(x_test1)
+x_test1=scale(data1.values)
+y_pred1=rf.predict(x_test1)
 
 
 # transforming final result into submittable form
