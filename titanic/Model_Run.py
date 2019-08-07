@@ -99,7 +99,7 @@ class Model_manager:
     
     def logreg_model_train(self,train,targets,run_gs)->bytes:
         
-        train=Feature_Engineering().input_feat_scale(input_data=train,col_list=[2,5],train_yes=True)
+        train=Feature_Engineering().input_feat_scale(input_data=train,train_yes=True)
         if run_gs==False:
             lg=LogisticRegression(random_state=0,solver='liblinear',C=1.62,penalty='l1')
             lg.fit(train,targets)
