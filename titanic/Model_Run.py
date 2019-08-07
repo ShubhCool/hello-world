@@ -13,7 +13,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 
-from feature_engineering import Feature_Engineering
+from codes.feature_engineering import Feature_Engineering
 import pandas as pd
 import numpy as np
 import pickle
