@@ -10,7 +10,12 @@ from sklearn.feature_selection import SelectFromModel
 from sklearn.ensemble.gradient_boosting import GradientBoostingClassifier
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import GridSearchCV
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+
+from feature_engineering import Feature_Engineering
 import pandas as pd
+import numpy as np
 import pickle
 
 class Model_manager:
@@ -87,6 +92,54 @@ class Model_manager:
                  'criterion':['gini','entropy']
                  }
             grid_sear=GridSearchCV(rf,param_grid=parameters,scoring='accuracy',cv=10)
+            grid=grid_sear.fit(train,targets)
+            print(grid.best_score_)
+            print(grid.best_params_)       
+        return pickle.dumps(grid)
+    
+    def logreg_model_train(self,train,targets,run_gs)->bytes:
+        
+        train=Feature_Engineering().input_feat_scale(input_data=train,col_list=[2,5],train_yes=True)
+        if run_gs==False:
+            lg=LogisticRegression(random_state=0,solver='liblinear',C=1.62,penalty='l1')
+            lg.fit(train,targets)
+            cv_result=cross_val_score(lg,train,targets,cv=5)
+            print('Logistic Regression cross validation score is ',cv_result.mean() )
+            return pickle.dumps(lg)
+            
+        else:
+            #using grid search CV with random forest  classfier
+            lg=LogisticRegression(random_state=0,solver='liblinear')
+            parameters = {
+                 'C' : np.logspace(-4,4,20),
+                 'penalty':['l1','l2']
+                 }
+            grid_sear=GridSearchCV(lg,param_grid=parameters,scoring='accuracy',cv=10)
+            grid=grid_sear.fit(train,targets)
+            print(grid.best_score_)
+            print(grid.best_params_)       
+        return pickle.dumps(grid)
+    
+    def svm_model_train(self,train,targets,run_gs)->bytes:
+        
+        train=Feature_Engineering().input_feat_scale(input_data=train,train_yes=True)
+        np.savetxt('/home/shubham/Desktop/open_projects/temp.csv', train, delimiter=",")
+        if run_gs==False:
+            sv=SVC(random_state=0,kernel='rbf',gamma=0.08,C=1)
+            sv.fit(train,targets)
+            cv_result=cross_val_score(sv,train,targets,cv=5)
+            print('SVM cross validation score is ',cv_result.mean() )
+            return pickle.dumps(sv)
+            
+        else:
+            #using grid search CV with svm classfier
+            sv=SVC(random_state=0)
+            parameters = {
+                 'kernel' : ['rbf'],
+                 'C' : [2,1.5,1,0.5,0.1],
+                 'gamma':[0.08,0.1,0.05,0.03,0.06,0.07,0.09]
+                 }
+            grid_sear=GridSearchCV(sv,param_grid=parameters,scoring='accuracy',cv=10)
             grid=grid_sear.fit(train,targets)
             print(grid.best_score_)
             print(grid.best_params_)       
