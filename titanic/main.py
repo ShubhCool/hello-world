@@ -25,8 +25,8 @@ if __name__ == '__main__':
     #test_data = DG.load_dataset(file_path=r'/home/shubham/Desktop/open_projects/',file_name='test.csv')
     combined_data=DG.get_combined_data(file_path=r'/home/shubham/Desktop/open_projects/',train_file_name='train.csv',test_file_name='test.csv')
     
-    FE=Feature_Engineering(combined_data)
-    combined_data=FE.derive_new_cols()
+    FE=Feature_Engineering()
+    combined_data=FE.derive_new_cols(combined_data)
     
     FP=Feature_Prepration(combined_data)
     FP.separate_variable_types()
@@ -39,22 +39,31 @@ if __name__ == '__main__':
     targets = train_data.Survived
     train_data = combined_data[ :891]
     test_data=combined_data[891:]
-    
     FS_model=pickle.loads(Model_manager().Tree_Based_FS(train_data,targets))
     train_reduced=FS_model.transform(train_data)
     test_reduced=FS_model.transform(test_data)
     
     MM=Model_manager()
     start = timeit.timeit()
-    model=MM.rf_model_train(train_reduced,targets,run_gs=False)
-    #MM.gbm_model_train(train_data,targets,run_gs=True)
+    #return trained model in bytes type
+    #model=MM.rf_model_train(train_reduced,targets,run_gs=False)
+    #model=MM.logreg_model_train(train_reduced,targets,run_gs=False)
+    #model=MM.svm_model_train(train_reduced,targets,run_gs=False)
     end = timeit.timeit()
     print('time taken to run this model',(end - start))
+     
+    pickle_the_file=False
     
-    MP=Model_Pred()
-    MP.run_test_prediction(model,test_reduced)
+    if pickle_the_file:
+        #pickle file folder path
+        pkl_path='/home/shubham/Desktop/open_projects/pkl_files/'
+        pkl_name='sv1.pickle'
+        MP=Model_Pred()
+        MP.save_model_pickle(model,pkl_path,pkl_name)
+        MP.run_test_prediction(test_reduced,pkl_path,pkl_name)
+    else:
+        pass
     
-
 
     
     
